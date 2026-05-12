@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Northlight — Image viewer for Mac</title>
+    <meta name="description" content="A fast, focused image viewer for the Mac. Open an image. Flip through the folder with the mouse wheel. Every format you'd want — including camera RAW. Free for macOS 15 and up.">
+    <meta name="author" content="DGTL TECH">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://dgtltech.github.io/Northlight/">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+
+    <meta property="og:title" content="Northlight — Image viewer for Mac">
+    <meta property="og:description" content="An image viewer the way it used to feel. Open an image, scroll.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dgtltech.github.io/Northlight/">
+    <meta property="og:image" content="https://dgtltech.github.io/Northlight/app-icon.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Northlight — Image viewer for Mac">
+    <meta name="twitter:description" content="An image viewer the way it used to feel. Open an image, scroll.">
+    <meta name="twitter:image" content="https://dgtltech.github.io/Northlight/app-icon.webp">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Northlight",
+        "operatingSystem": "macOS 15.0",
+        "applicationCategory": "PhotoApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "downloadUrl": "https://github.com/dgtltech/Northlight/releases/latest",
+        "softwareVersion": "1.3",
+        "description": "A fast, focused image viewer for macOS. Browse a folder with the mouse wheel; supports JPEG, PNG, HEIC, WebP, AVIF, JPEG XL, PSD and a wide range of camera RAW formats.",
+        "publisher": {
+            "@type": "Organization",
+            "name": "DGTL TECH",
+            "url": "https://dgtl.tech"
+        }
+    }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --accent: #0071e3;
+            --border-color: rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --bg-primary: #000000;
+            --bg-secondary: #1d1d1f;
+            --accent: #2997ff;
+            --border-color: rgba(255,255,255,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --text-primary: #f5f5f7;
+                --text-secondary: #86868b;
+                --bg-primary: #000000;
+                --bg-secondary: #1d1d1f;
+                --accent: #2997ff;
+                --border-color: rgba(255,255,255,0.1);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 24px;
+            z-index: 100;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon { display: none; }
+        [data-theme="light"] .theme-toggle .icon-moon { display: block; }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+        }
+        @media (prefers-color-scheme: light) {
+            :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
+        }
+
+        .app-hero {
+            text-align: center;
+            padding: 160px 24px 60px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .app-hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin: 0 0 12px;
+        }
+        .app-hero .tagline {
+            font-size: 21px;
+            color: var(--text-secondary);
+            margin: 0 0 40px;
+            line-height: 1.5;
+        }
+        .app-icon-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 27px;
+            margin-bottom: 32px;
+        }
+        .download-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 980px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background 0.15s ease;
+        }
+        .download-btn:hover { opacity: 0.9; }
+        .download-meta {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .features-section {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .features-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0 0 32px;
+            text-align: center;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .feature-card {
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+        }
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 6px;
+        }
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .info-section {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .info-section p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            text-align: center;
+        }
+        .info-section a {
+            color: var(--accent);
+        }
+        .info-section a:hover { text-decoration: underline; }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 32px 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        footer a {
+            color: var(--text-secondary);
+            margin: 0 12px;
+        }
+        footer a:hover {
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .app-hero h1 { font-size: 36px; }
+            .app-hero .tagline { font-size: 18px; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .features-section h2 { font-size: 28px; }
+            .app-hero { padding-top: 120px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" type="button">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+</div>
+
+<main>
+    <section class="app-hero">
+        <img src="app-icon.webp" alt="Northlight" class="app-icon-large">
+        <h1>Northlight</h1>
+        <p class="tagline">An image viewer the way it used to feel. Open an image, scroll.</p>
+        <a href="https://github.com/dgtltech/Northlight/releases/latest/download/Northlight.zip" class="download-btn" aria-label="Download Northlight for macOS">Download for macOS</a>
+        <p class="download-meta">Free &middot; macOS 15 or later &middot; <a href="https://github.com/dgtltech/Northlight/releases" style="color: var(--text-secondary);">All releases</a></p>
+    </section>
+
+    <section class="features-section">
+        <h2>Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Spin the wheel</h3>
+                <p>Roll your mouse wheel to flip through every image in a folder, the way image viewers used to work. Hold &#8984; and scroll to zoom. Pinch on the trackpad if you've moved on.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Open an image &mdash; that's the library</h3>
+                <p>No imports. No catalog. No "would you like to sync." Open any image and you're already browsing its folder. Sort by name, date, or size, and reverse it whenever you want.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Every format that matters</h3>
+                <p>JPEG, PNG, HEIC, WebP, AVIF, JPEG XL, PSD &mdash; and camera RAW from Canon, Nikon, Sony, Fuji, Panasonic, Olympus, Pentax, Sigma, Hasselblad, Leica and more. One viewer for everything in the folder.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Quietly native</h3>
+                <p>Built in AppKit for modern macOS. Light, quick, and yours &mdash; no account, no telemetry, no cloud. Just an app that opens images.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="info-section">
+        <p>Northlight is free and we don't track anything. Files stay on your Mac. Built with passion for people who miss when looking at a folder of photos was a single click away.</p>
+    </section>
+</main>
+
+<footer>
+    <a href="https://github.com/dgtltech/Northlight">Source on GitHub</a>
+    <a href="https://github.com/dgtltech/Northlight/releases">Releases</a>
+    <a href="https://dgtl.tech">DGTL.TECH</a>
+</footer>
+
+<script>
+    const toggle = document.getElementById('themeToggle');
+    function getPreferred() {
+        const stored = localStorage.getItem('theme');
+        if (stored === 'dark' || stored === 'light') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function apply(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }
+    apply(getPreferred());
+    toggle.addEventListener('click', () => {
+        apply(getPreferred() === 'dark' ? 'light' : 'dark');
+    });
+</script>
+
+</body>
+</html>

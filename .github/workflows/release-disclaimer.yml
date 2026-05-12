@@ -1,0 +1,32 @@
+name: Prepend disclaimer to releases
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  prepend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepend disclaimer if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          BODY=$(gh release view "$TAG" --json body --jq '.body')
+          if printf '%s' "$BODY" | grep -qF 'auto-generated *Source code* archives'; then
+            echo "Disclaimer already present in $TAG; nothing to do."
+            exit 0
+          fi
+          {
+            cat .github/release-disclaimer.md
+            printf '%s\n' "$BODY"
+          } > /tmp/notes.md
+          gh release edit "$TAG" --notes-file /tmp/notes.md
+          echo "Disclaimer prepended to $TAG."
